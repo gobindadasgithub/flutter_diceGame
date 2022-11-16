@@ -1,6 +1,9 @@
-import 'dart:math';
 
+
+import 'package:dice_game/game_provider.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+
 
 class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);
@@ -11,20 +14,8 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
 
-  final dice_list=<String> [
-    'images/d1.png',
-    'images/d2.png',
-    'images/d3.png',
-    'images/d4.png',
-    'images/d5.png',
-    'images/d6.png',
 
-  ];
-  int index_1=0, index_2=0, dice_sum=0, _point=0;
-  final random=Random.secure();
-  bool hasGameStarted=false;
-  bool gameOver=false;
-  String status='';
+
 
   @override
   Widget build(BuildContext context) {
@@ -34,34 +25,39 @@ class _HomePageState extends State<HomePage> {
         title: Text('Dice Game'),
         centerTitle: true,
       ),
-      body: Center(
-       child: hasGameStarted? _gameSelction() : _startGameSelected(),
+      body: Consumer<GameProvider>(
+        builder:(context,provider,_)=>Center(
+
+         child: provider.hasGameStarted? _gameSelction(provider) : _startGameSelected(provider),
+        ),
       ),
 
     );
   }
 
-  Widget _startGameSelected(){
+  Widget _startGameSelected(GameProvider provider){
 
-    return ElevatedButton(onPressed: (){
-      setState(() {
-        hasGameStarted=true;
-      });
+    return ElevatedButton(onPressed: (){ {
+
+provider.start();
+
+      };
     },
 
         child: Text("Start"));
   }
-  Widget _gameSelction(){
+  Widget _gameSelction(GameProvider provider){
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
+
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Image.asset(dice_list[index_1],width: 100,height: 100,),
+            Image.asset(provider.dice_list[provider.index_1],width: 100,height: 100,),
             const SizedBox(width: 10,),
 
-            Image.asset(dice_list[index_2],width: 100,height: 100,),
+            Image.asset(provider.dice_list[provider.index_2],width: 100,height: 100,),
 
 
           ],
@@ -72,92 +68,31 @@ class _HomePageState extends State<HomePage> {
           height: 50,
           width: 200,
           child: ElevatedButton(
-            onPressed: gameOver?null :_rollTheDice,
+            onPressed: provider.gameOver?null :provider.rollTheDice,
             child: Text('Roll'),
           ),
         ),
         const SizedBox(height: 10,),
-        Text('Dice Sum : $dice_sum',style: TextStyle(fontSize: 22),),
+        Text('Dice Sum : $provider.dice_sum',style: TextStyle(fontSize: 22),),
         const SizedBox(height: 10,),
-        if(_point>0)
-          Text('Your Point : $_point',style: TextStyle(fontSize: 22,color: Colors.green),),
+        if(provider.point>0)
+          Text('Your Point : $provider.point',style: TextStyle(fontSize: 22,color: Colors.green),),
         const SizedBox(height: 10,),
-        if(_point>0 && !gameOver)
-          Text('Keep Rolling until your match your point : $_point',style: TextStyle(fontSize: 22,backgroundColor: Colors.amber),),
+        if(provider.point>0 && !provider.gameOver)
+          Text('Keep Rolling until your match your point : $provider.point',style: TextStyle(fontSize: 22,backgroundColor: Colors.amber),),
         const SizedBox(height: 10,),
-        if(gameOver)
-          Text(status,style: TextStyle(fontSize: 10,color: Colors.deepPurple),),
+        if(provider.gameOver)
+          Text(provider.status,style: TextStyle(fontSize: 10,color: Colors.deepPurple),),
         const SizedBox(height: 10,),
-        if(gameOver)
+        if(provider.gameOver)
           SizedBox(
             child: ElevatedButton(
-              onPressed: resetGame,
+              onPressed:provider.resetGame,
               child: Text('Play Again'),
             ),
           )
       ],
     );
   }
-  void _rollTheDice(){
-    setState(() {
-      index_1=random.nextInt(6);
-      index_2=random.nextInt(6);
-      dice_sum=index_1 * index_2 +2;
-      if(_point >0){
-        checkSecondThrow();
-      }else{
-        checkFirstThrow();
-      }
 
-    });
-  }
-
-
-
-
-  void resetGame() {
-   setState(() {
-     index_1=0;
-     index_2=0;
-     dice_sum=0;
-     _point=0;
-     gameOver=false;
-     hasGameStarted=false;
-   });
-  }
-
-  void checkSecondThrow() {
-    if(dice_sum==_point){
-      status='You Win!!!';
-      gameOver=true;
-
-    }
-    else if(dice_sum==7){
-      status='You Loss!!!';
-      gameOver=true;
-
-    }
-
-  }
-
-  void checkFirstThrow() {
-    switch(dice_sum){
-      case 7:
-      case 11:
-        status='You Win!!!';
-        gameOver=true;
-        break;
-      case 2:
-      case 3:
-        status='You Loss!!!';
-        gameOver=true;
-        break;
-      default:
-        _point=dice_sum;
-        break;
-
-
-
-    }
-  }
 }

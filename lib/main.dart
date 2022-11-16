@@ -1,8 +1,13 @@
+import 'package:dice_game/game_provider.dart';
 import 'package:dice_game/pages/home_page.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 void main() {
-  runApp(const MyApp());
+  runApp(ChangeNotifierProvider(
+      create:(context)=> GameProvider(),
+    child: MyApp(),
+  ));
 }
 
 class MyApp extends StatelessWidget {
